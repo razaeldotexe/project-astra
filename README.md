@@ -1,18 +1,32 @@
-## Getting Started
+# Project Astra
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+A Discord Bot built with Java using the [JDA (Java Discord API)](https://github.com/discord-jda/JDA) library.
 
-## Folder Structure
+## Prerequisites
 
-The workspace contains two folders by default, where:
+- Java 25 or higher
+- Maven 3.x
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+## Structure
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+- `src/main/java/` : Contains the source code of the bot.
+- `pom.xml` : Maven configuration containing the project dependencies.
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+## Setup and Run
 
-## Dependency Management
+1. Clone this repository.
+2. Build the project using Maven:
+   ```sh
+   mvn clean compile
+   ```
+3. Run the bot:
+   ```sh
+   mvn exec:java
+   ```
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+Make sure you configure your bot token (e.g., via environment variables or a configuration file) before running.
+
+## Dependencies
+
+- JDA 5.0.0-beta.20
+- slf4j-simple 2.0.12
