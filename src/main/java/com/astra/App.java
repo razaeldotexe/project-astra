@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -46,9 +47,12 @@ public class App extends ListenerAdapter {
                 guild.updateCommands().addCommands(
                     Commands.slash("ping", "Menghitung latensi bot"),
                     Commands.slash("hello", "Menyapa bot astra"),
-                    Commands.slash("analisis", "Mendapatkan wawasan bisnis StatFox untuk server ini")
+                    Commands.slash("analisis", "Mendapatkan wawasan bisnis StatFox untuk server ini"),
+                    Commands.slash("monitor-mc", "Dapatkan diagnosis kesehatan server Minecraft FoxSync"),
+                    Commands.slash("monitor-mc2", "Monitor server Minecraft luar berdasarkan IP")
+                        .addOption(OptionType.STRING, "ip", "Alamat IP atau Hostname server Minecraft", true)
                 ).queue();
-                System.out.println("Guild Commands (/ping, /hello, /analisis) registered to: " + guild.getName());
+                System.out.println("Guild Commands registered to: " + guild.getName());
             } else {
                 System.err.println("Guild dengan ID " + guildId + " tidak ditemukan! Pastikan bot sudah ada di server tersebut.");
             }
@@ -57,7 +61,10 @@ public class App extends ListenerAdapter {
             jda.updateCommands().addCommands(
                 Commands.slash("ping", "Menghitung latensi bot"),
                 Commands.slash("hello", "Menyapa bot astra"),
-                Commands.slash("analisis", "Mendapatkan wawasan bisnis StatFox untuk server ini")
+                Commands.slash("analisis", "Mendapatkan wawasan bisnis StatFox untuk server ini"),
+                Commands.slash("monitor-mc", "Dapatkan diagnosis kesehatan server Minecraft FoxSync"),
+                Commands.slash("monitor-mc2", "Monitor server Minecraft luar berdasarkan IP")
+                    .addOption(OptionType.STRING, "ip", "Alamat IP atau Hostname server Minecraft", true)
             ).queue();
         }
 
@@ -100,6 +107,47 @@ public class App extends ListenerAdapter {
 
             event.reply("📊 **StatFox Analyst Report** 🦊\n\n" + result.toString())
                  .setEphemeral(false).queue();
+        } else if (event.getName().equals("monitor-mc")) {
+            // Simulasi telemetri Minecraft (MOCK TELEMETRY)
+            String mcTelemetry = "{" +
+                "\"tps\": 14.5," +
+                "\"ram_usage_percent\": 92.4," +
+                "\"cpu_usage_percent\": 78.0," +
+                "\"player_count\": 12," +
+                "\"config\": {" +
+                    "\"view-distance\": 10," +
+                    "\"max-players\": 50" +
+                "}," +
+                "\"active_plugins\": [\"EssentialsX\", \"WorldGuard\", \"Dynmap\", \"LuckPerms\"]" +
+            "}";
+
+            MinecraftWarden warden = new MinecraftWarden();
+            MinecraftWarden.WardenReport report = warden.diagnose(mcTelemetry);
+
+            event.reply(report.toString()).setEphemeral(false).queue();
+        } else if (event.getName().equals("monitor-mc2")) {
+            String ip = event.getOption("ip").getAsString();
+            
+            // Memberikan respon awal karena fetching data bisa memakan waktu (deference)
+            event.deferReply().queue();
+
+            // Jalankan fetching dalam thread terpisah agar tidak memblokir JDA
+            new Thread(() -> {
+                try {
+                    MinecraftWarden warden = new MinecraftWarden();
+                    String statusJson = warden.fetchRemoteStatus(ip);
+                    
+                    if (statusJson.contains("\"error\"")) {
+                        event.getHook().sendMessage("❌ **Gagal mengambil status:** " + statusJson).queue();
+                        return;
+                    }
+
+                    MinecraftWarden.WardenReport report = warden.diagnose(statusJson);
+                    event.getHook().sendMessage("🌐 **Remote Monitoring: " + ip + "**\n\n" + report.toString()).queue();
+                } catch (Exception e) {
+                    event.getHook().sendMessage("❌ **Terjadi kesalahan:** " + e.getMessage()).queue();
+                }
+            }).start();
         }
     }
 }
