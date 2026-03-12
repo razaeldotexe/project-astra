@@ -1,32 +1,37 @@
-# Project Astra
+# Astra Discord Bot 🚀
 
-A Discord Bot built with Java using the [JDA (Java Discord API)](https://github.com/discord-jda/JDA) library.
+Bot Discord berbasis Java (JDA) dengan fitur sistem ekonomi lengkap, monitoring server Minecraft, dan analisis aktivitas server.
 
-## Prerequisites
+## ✨ Fitur Utama
+- **Sistem Ekonomi**: Wallet, Bank, Kerja, Hadiah Harian, Toko Item, dan Leaderboard.
+- **Monitoring Minecraft**: Cek kesehatan server (TPS, RAM) dan status server luar via IP.
+- **StatFox Analyst**: Analisis aktivitas chat dan voice server secara real-time.
+- **Slash Commands**: Semua perintah terintegrasi dengan antarmuka Discord terbaru.
 
-- Java 25 or higher
-- Maven 3.x
+## 🛠️ Persyaratan
+- Java 17 atau lebih baru.
+- Maven.
+- Bot Discord Token (dari [Discord Developer Portal](https://discord.com/developers/applications)).
 
-## Structure
-
-- `src/main/java/` : Contains the source code of the bot.
-- `pom.xml` : Maven configuration containing the project dependencies.
-
-## Setup and Run
-
-1. Clone this repository.
-2. Build the project using Maven:
-   ```sh
-   mvn clean compile
+## 🚀 Cara Instalasi
+1. Clone repositori ini.
+2. Salin file `.env.example` menjadi `.env`.
+3. Isi `DISCORD_TOKEN` dan `GUILD_ID` di file `.env`.
+4. Jalankan perintah berikut untuk meng-compile:
+   ```bash
+   mvn clean package
    ```
-3. Run the bot:
-   ```sh
+5. Jalankan bot:
+   ```bash
    mvn exec:java
    ```
 
-Make sure you configure your bot token (e.g., via environment variables or a configuration file) before running.
+## 💰 Perintah Ekonomi
+- `/balance` - Cek saldo wallet & bank.
+- `/work` - Cari uang dengan bekerja.
+- `/daily` - Klaim hadiah harian.
+- `/shop` & `/buy` - Belanja item menarik.
+- `/leaderboard` - Lihat siapa yang paling sultan.
 
-## Dependencies
-
-- JDA 5.0.0-beta.20
-- slf4j-simple 2.0.12
+## 📄 Lisensi
+[MIT License](LICENSE)

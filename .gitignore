@@ -60,3 +60,7 @@ Thumbs.db
 
 # Env vars
 .env
+
+# Database
+economy.db
+*.db
