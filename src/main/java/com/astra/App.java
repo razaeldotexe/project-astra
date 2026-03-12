@@ -5,13 +5,17 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class App extends ListenerAdapter {
     public static void main(String[] args) throws Exception {
-        // Ganti "YOUR_BOT_TOKEN" dengan token bot Discord Anda (Disarankan menggunakan Environment Variable)
-        String token = System.getenv("DISCORD_TOKEN");
-        if (token == null) {
-            token = "YOUR_BOT_TOKEN";
+        // Load the .env file
+        Dotenv dotenv = Dotenv.load();
+
+        // Mengambil token dari Environment Variable bernama "DISCORD_TOKEN"
+        String token = dotenv.get("DISCORD_TOKEN");
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("DISCORD_TOKEN tidak ditemukan di file .env");
         }
 
         JDABuilder.createDefault(token)
