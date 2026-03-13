@@ -66,44 +66,46 @@ public class PlayCommand implements MusicCommand {
         musicManager.getScheduler().setMessageChannel(channel);
         Link link = musicManager.getLink();
         
-        // 1. Connect to voice channel first
+        // 1. Connect to voice channel first (JDA native)
         guild.getJDA().getDirectAudioController().connect(voiceState.getChannel());
 
         String searchQuery = query.startsWith("http") ? query : "ytsearch:" + query;
 
-        // 2. Wait for connection (using getPlayer Mono) then load item
-        // This prevents the race condition where tracks are played before voice is ready
+        // 2. Wait for player ready then load item
         link.getPlayer()
             .flatMap(player -> link.loadItem(searchQuery))
             .subscribe(result -> {
                 try {
                     if (result instanceof TrackLoaded t) {
                         Track track = t.getTrack();
-                        musicManager.getScheduler().queue(track);
-                        reply(channel, slashEvent, "▶️ Memutar: **" + track.getInfo().getTitle() + "**");
+                        link.updatePlayer(update -> update.setTrack(track)).subscribe();
+                        reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "**");
                     } else if (result instanceof PlaylistLoaded p) {
                         List<Track> tracks = p.getTracks();
-                        tracks.forEach(t -> musicManager.getScheduler().queue(t));
-                        reply(channel, slashEvent, "📋 Playlist dimuat: **" + p.getInfo().getName() + "** (" + tracks.size() + " lagu)");
+                        if (!tracks.isEmpty()) {
+                            Track track = tracks.get(0);
+                            link.updatePlayer(update -> update.setTrack(track)).subscribe();
+                            reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "** (from playlist: " + p.getInfo().getName() + ")");
+                        }
                     } else if (result instanceof SearchResult s) {
                         List<Track> tracks = s.getTracks();
                         if (tracks.isEmpty()) {
-                            reply(channel, slashEvent, "❌ Lagu tidak ditemukan!");
+                            reply(channel, slashEvent, "❌ No results found.");
                         } else {
                             Track track = tracks.get(0);
-                            musicManager.getScheduler().queue(track);
-                            reply(channel, slashEvent, "▶️ Memutar: **" + track.getInfo().getTitle() + "**");
+                            link.updatePlayer(update -> update.setTrack(track)).subscribe();
+                            reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "**");
                         }
                     } else if (result instanceof NoMatches) {
-                        reply(channel, slashEvent, "❌ Tidak ada hasil ditemukan.");
+                        reply(channel, slashEvent, "❌ No results found.");
                     } else if (result instanceof LoadFailed f) {
-                        reply(channel, slashEvent, "❌ Error saat memuat lagu: " + f.getException().getMessage());
+                        reply(channel, slashEvent, "❌ Error: " + f.getException().getMessage());
                     }
                 } catch (Exception e) {
                     reply(channel, slashEvent, "❌ Terjadi kesalahan internal: " + e.getMessage());
                 }
-            }, throwable -> {
-                reply(channel, slashEvent, "❌ Gagal menghubungi server musik: " + throwable.getMessage());
+            }, error -> {
+                reply(channel, slashEvent, "❌ Error: " + error.getMessage());
             });
     }
 

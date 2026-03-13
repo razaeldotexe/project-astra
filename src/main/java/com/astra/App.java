@@ -46,18 +46,6 @@ public class App extends ListenerAdapter {
                 logger.info("Lavalink Node [{}] is READY.", event.getNode().getName());
             });
 
-            // Note: v3.4.0 uses NodeDisconnectedEvent or DisconnectedEvent? 
-            // According to some source it might be dev.arbjerg.lavalink.client.event.NodeDisconnectedEvent
-            // If it failed before, I'll try to find the correct class.
-            // Actually, let's keep only ReadyEvent for now if NodeDisconnectedEvent is elusive,
-            // or use a more general catch-all if possible.
-            // Wait, I saw the error: dev.arbjerg.lavalink.client.event.NodeDisconnectedEvent cannot be resolved.
-            /*
-            lavalinkClient.on(dev.arbjerg.lavalink.client.event.StatsEvent.class).subscribe(event -> {
-                // Heartbeat
-            });
-            */
-
             JDA jda = JDABuilder.createDefault(token)
                     .setActivity(Activity.playing("Astra Projects | .help - /help"))
                     .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES)
