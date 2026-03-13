@@ -17,6 +17,7 @@ public class SshService {
     private OutputStream out;
     private InputStream in;
     private BufferedReader reader;
+    private String lastErrorMessage = "No connection attempt yet.";
 
     public SshService() {
         // Initialization can be lazy or immediate. We'll attempt immediate connection.
@@ -53,12 +54,14 @@ public class SshService {
 
             channel.connect();
             logger.info("SSH Session established with VPS: {}@{}", user, host);
+            lastErrorMessage = null;
 
             // Read initial banner
             readOutputAsync();
 
         } catch (Exception e) {
-            logger.error("Failed to connect to VPS via SSH", e);
+            lastErrorMessage = e.getMessage();
+            logger.error("Failed to connect to VPS via SSH: {}", lastErrorMessage);
         }
     }
 
@@ -68,7 +71,7 @@ public class SshService {
         }
 
         if (session == null || !session.isConnected()) {
-            return "[ERROR] Not connected to VPS.";
+            return "[ERROR] Not connected to VPS: " + (lastErrorMessage != null ? lastErrorMessage : "Unknown Error");
         }
 
         try {

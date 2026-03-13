@@ -8,10 +8,13 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ShellListener extends ListenerAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(ShellListener.class);
     private final SshService sshService;
     private final String shellChannelId;
     private final String allowedRoleId;
@@ -41,13 +44,16 @@ public class ShellListener extends ListenerAdapter {
         String command = event.getMessage().getContentRaw().trim();
         if (command.isEmpty()) return;
 
+        // Auditing: Log command execution
+        logger.info("[SHELL] User: {}#{} (ID: {}) executed command: {}", 
+            event.getAuthor().getName(), event.getAuthor().getDiscriminator(), event.getAuthor().getId(), command);
+
         event.getChannel().sendTyping().queue();
 
         executor.submit(() -> {
             String output = sshService.executeCommand(command);
             
             if (output.length() > 1900) {
-                // Split or send as file
                 sendLargeMessage(event, output);
             } else {
                 event.getChannel().sendMessage("```\n" + output + "\n```").queue();
