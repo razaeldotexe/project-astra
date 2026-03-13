@@ -32,8 +32,11 @@ public class SshService {
 
         if (host == null || user == null) {
             logger.warn("VPS credentials not fully configured in .env. SSH Service disabled.");
+            lastErrorMessage = "Missing VPS_HOST or VPS_USER in .env";
             return;
         }
+
+        logger.info("Attempting SSH connection to {}@{} on port {}", user, host, portStr);
 
         try {
             JSch jsch = new JSch();
@@ -71,7 +74,7 @@ public class SshService {
         }
 
         if (session == null || !session.isConnected()) {
-            return "[ERROR] Not connected to VPS: " + (lastErrorMessage != null ? lastErrorMessage : "Unknown Error");
+            return "❌ [v1.1 ERROR] Not connected to VPS: " + (lastErrorMessage != null ? lastErrorMessage : "Unknown Error");
         }
 
         try {
