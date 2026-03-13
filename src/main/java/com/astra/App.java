@@ -38,11 +38,11 @@ public class App extends ListenerAdapter {
         try {
             JDA jda = JDABuilder.createDefault(token)
                     .setActivity(Activity.playing("Astra Projects | .help - /help"))
-                    .enableIntents(GatewayIntent.MESSAGE_CONTENT)
+                    .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
                     .build();
             CommandHandler commandHandler = new CommandHandler();
             SshService sshService = new SshService();
-            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler), new VerifyListener(), new ShellListener(sshService));
+            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler), new VerifyListener(), new ShellListener(sshService), new com.astra.commands.PurgeCommand());
 
             jda.awaitReady();
             logger.info("JDA Session Established successfully.");
@@ -66,6 +66,28 @@ public class App extends ListenerAdapter {
                             Commands.slash("setup", "Setup bot features")
                                     .addSubcommands(new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("verify", "Setup verification message"))
                                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
+
+                            Commands.slash("purge", "Hapus pesan secara massal")
+                                    .addSubcommands(
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("all", "Hapus semua pesan")
+                                                    .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dihapus (maks 100)", true),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("bot", "Hapus pesan dari bot")
+                                                    .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dicek", true),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("embed", "Hapus pesan yang mengandung embed")
+                                                    .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dicek", true),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("links", "Hapus pesan yang mengandung link")
+                                                    .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dicek", true),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("images", "Hapus pesan yang mengandung gambar")
+                                                    .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dicek", true),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("user", "Hapus pesan dari user tertentu")
+                                                    .addOption(OptionType.USER, "target", "User yang pesannya dihapus", true)
+                                                    .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dicek", true),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("mentions", "Hapus pesan yang mengandung mention")
+                                                    .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dicek", true),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("pinned", "Hapus pesan yang di-pin")
+                                                    .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dicek", true)
+                                    )
+                                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MESSAGE_MANAGE)),
 
                             // Economy Commands
                             Commands.slash("balance", "Tampilkan saldo wallet & bank")
