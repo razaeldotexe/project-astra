@@ -68,6 +68,23 @@ public class DatabaseConfig {
                     "tx_type TEXT NOT NULL," +
                     "description TEXT," +
                     "created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+
+            // Showcase Projects Table
+            stmt.execute("CREATE TABLE IF NOT EXISTS projects (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "name TEXT UNIQUE NOT NULL," +
+                    "description TEXT," +
+                    "link TEXT," +
+                    "tags TEXT," +
+                    "owner_id TEXT NOT NULL," +
+                    "guild_id TEXT NOT NULL," +
+                    "stars INTEGER DEFAULT 0," +
+                    "created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+
+            // Showcase Metadata (for tracking status message)
+            stmt.execute("CREATE TABLE IF NOT EXISTS showcase_metadata (" +
+                    "key TEXT PRIMARY KEY," +
+                    "value TEXT)");
             
             // Seed items if empty
             stmt.execute("INSERT OR IGNORE INTO items (item_name, description, price) VALUES " +
