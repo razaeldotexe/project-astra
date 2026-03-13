@@ -42,7 +42,11 @@ public class App extends ListenerAdapter {
                     .build();
             CommandHandler commandHandler = new CommandHandler();
             SshService sshService = new SshService();
-            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler), new VerifyListener(), new ShellListener(sshService), new com.astra.commands.PurgeCommand());
+            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler), new VerifyListener(), new ShellListener(sshService), new com.astra.commands.PurgeCommand(), new com.astra.showcase.listeners.ProjectListener());
+
+            String showcaseChannelId = dotenv.get("PROJECT_SHOWCASE_CHANNEL_ID");
+            com.astra.showcase.service.ShowcaseManager showcaseManager = new com.astra.showcase.service.ShowcaseManager(jda, showcaseChannelId);
+            showcaseManager.start();
 
             jda.awaitReady();
             logger.info("JDA Session Established successfully.");
@@ -88,6 +92,20 @@ public class App extends ListenerAdapter {
                                                     .addOption(OptionType.INTEGER, "jumlah", "Jumlah pesan yang dicek", true)
                                     )
                                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MESSAGE_MANAGE)),
+
+                            Commands.slash("project", "Community project showcase system")
+                                    .addSubcommands(
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("add", "Submit project baru")
+                                                    .addOption(OptionType.STRING, "name", "Nama project", true)
+                                                    .addOption(OptionType.STRING, "description", "Deskripsi singkat", true)
+                                                    .addOption(OptionType.STRING, "link", "Link GitHub atau demo", true)
+                                                    .addOption(OptionType.STRING, "tags", "Tag project (misal: java, discord)", false),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("list", "Lihat daftar project"),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("view", "Lihat detail suatu project")
+                                                    .addOption(OptionType.STRING, "name", "Nama project", true),
+                                            new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("delete", "Hapus project milikmu")
+                                                    .addOption(OptionType.STRING, "name", "Nama project", true)
+                                    ),
 
                             // Economy Commands
                             Commands.slash("balance", "Tampilkan saldo wallet & bank")
