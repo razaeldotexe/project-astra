@@ -53,7 +53,7 @@ public class SetupCommand implements EconomyCommand {
                 .setFooter(BotConfig.FOOTER_TEXT, event.getJDA().getSelfUser().getEffectiveAvatarUrl());
 
         channel.sendMessageEmbeds(embed.build())
-                .addActionRow(Button.primary("verify_button", "Verify"))
+                .addActionRow(Button.success("verify_button", "Verify"))
                 .queue();
 
         event.reply("✅ Pesan verifikasi telah dikirim ke " + channel.getAsMention()).setEphemeral(true).queue();
