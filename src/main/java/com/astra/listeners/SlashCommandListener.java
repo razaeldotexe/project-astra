@@ -6,10 +6,19 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 public class SlashCommandListener extends ListenerAdapter {
-    private final CommandHandler commandHandler = new CommandHandler();
+    private final CommandHandler economyHandler;
+    private final com.astra.audio.commands.MusicCommandHandler musicHandler;
+
+    public SlashCommandListener(CommandHandler economyHandler, com.astra.audio.commands.MusicCommandHandler musicHandler) {
+        this.economyHandler = economyHandler;
+        this.musicHandler = musicHandler;
+    }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        commandHandler.handle(event);
+        if (musicHandler.handleSlash(event)) {
+            return;
+        }
+        economyHandler.handle(event);
     }
 }

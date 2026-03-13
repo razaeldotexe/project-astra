@@ -12,16 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PrefixCommandListener extends ListenerAdapter {
-    private final CommandHandler commandHandler;
-    private final Map<String, EconomyCommand> commands = new HashMap<>();
+    private final CommandHandler economyHandler;
+    private final com.astra.audio.commands.MusicCommandHandler musicHandler;
 
-    public PrefixCommandListener(CommandHandler commandHandler) {
-        this.commandHandler = commandHandler;
-        // The commandHandler already has initialized commands, but they are private.
-        // For simplicity in this implementation, we will use the commandHandler's 
-        // internal map logic if possible, or re-register them here.
-        // Looking at CommandHandler.java, it doesn't expose the map.
-        // I will add a getter to CommandHandler instead.
+    public PrefixCommandListener(CommandHandler economyHandler, com.astra.audio.commands.MusicCommandHandler musicHandler) {
+        this.economyHandler = economyHandler;
+        this.musicHandler = musicHandler;
     }
 
     @Override
@@ -35,7 +31,11 @@ public class PrefixCommandListener extends ListenerAdapter {
         String commandName = parts[0].toLowerCase();
         String[] args = parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
 
-        EconomyCommand command = commandHandler.getCommand(commandName);
+        if (musicHandler.handlePrefix(event, commandName, args)) {
+            return;
+        }
+
+        EconomyCommand command = economyHandler.getCommand(commandName);
         if (command != null) {
             command.executePrefix(event, args);
         }

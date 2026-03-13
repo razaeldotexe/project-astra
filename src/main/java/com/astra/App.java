@@ -36,13 +36,22 @@ public class App extends ListenerAdapter {
         }
 
         try {
+            // Audio System Setup
+            com.astra.audio.commands.MusicCommandHandler musicCommandHandler = new com.astra.audio.commands.MusicCommandHandler();
+            long botId = dev.arbjerg.lavalink.client.Helpers.getUserIdFromToken(token);
+            dev.arbjerg.lavalink.client.LavalinkClient lavalinkClient = com.astra.audio.LavalinkManager.createClient(botId);
+
             JDA jda = JDABuilder.createDefault(token)
                     .setActivity(Activity.playing("Astra Projects | .help - /help"))
-                    .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
+                    .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES)
+                    .setVoiceDispatchInterceptor(new dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener(lavalinkClient))
                     .build();
+            
+            com.astra.audio.LavalinkManager.initializeNode(dotenv);
+            
             CommandHandler commandHandler = new CommandHandler();
             SshService sshService = new SshService();
-            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler), new VerifyListener(), new ShellListener(sshService), new com.astra.commands.PurgeCommand(), new com.astra.showcase.listeners.ProjectListener());
+            jda.addEventListener(new App(), new SlashCommandListener(commandHandler, musicCommandHandler), new PrefixCommandListener(commandHandler, musicCommandHandler), new VerifyListener(), new ShellListener(sshService), new com.astra.commands.PurgeCommand(), new com.astra.showcase.listeners.ProjectListener());
 
             String showcaseChannelId = dotenv.get("PROJECT_SHOWCASE_CHANNEL_ID");
             com.astra.showcase.service.ShowcaseManager showcaseManager = new com.astra.showcase.service.ShowcaseManager(jda, showcaseChannelId);
@@ -125,7 +134,16 @@ public class App extends ListenerAdapter {
                             Commands.slash("inventory", "Lihat inventaris item")
                                     .addOption(OptionType.USER, "user", "User yang ingin dilihat inventarisnya", false),
                             Commands.slash("leaderboard", "Tampilkan top-10 terkaya di server"),
-                            Commands.slash("help", "Tampilkan daftar perintah astra")).queue();
+                            Commands.slash("help", "Tampilkan daftar perintah astra"),
+                            
+                            // Music Commands
+                            Commands.slash("play", "Putar musik dari URL atau nama lagu")
+                                    .addOption(OptionType.STRING, "query", "URL atau nama lagu", true),
+                            Commands.slash("stop", "Stop musik dan hapus queue"),
+                            Commands.slash("skip", "Skip lagu sekarang"),
+                            Commands.slash("pause", "Pause atau resume lagu"),
+                            Commands.slash("queue", "Tampilkan queue musik")
+                    ).queue();
                     logger.info("Production Environment: Commands registered to Guild [{}]", guild.getName());
                 } else {
                     logger.warn("Guild ID [{}] not found. Falling back to global registration.", guildId);
