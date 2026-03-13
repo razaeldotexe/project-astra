@@ -45,10 +45,8 @@ plugins:
     allowDirectVideoIds: true
     allowDirectPlaylistIds: true
     clients:
-      - ANDROID_TESTSUITE
-      - TVHTML5EMBEDDED
-      - M_WEB
       - MUSIC
+      - ANDROID_TESTSUITE
       - WEB
 
 metrics:

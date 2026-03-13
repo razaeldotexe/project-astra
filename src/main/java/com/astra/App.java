@@ -42,8 +42,12 @@ public class App extends ListenerAdapter {
             dev.arbjerg.lavalink.client.LavalinkClient lavalinkClient = com.astra.audio.LavalinkManager.createClient(botId);
 
             // Register Lavalink Node status listeners
-            lavalinkClient.on(dev.arbjerg.lavalink.client.event.ReadyEvent.class).subscribe(event -> {
+            lavalinkClient.on(dev.arbjerg.lavalink.client.event.NodeReadyEvent.class).subscribe(event -> {
                 logger.info("Lavalink Node [{}] is READY.", event.getNode().getName());
+            });
+
+            lavalinkClient.on(dev.arbjerg.lavalink.client.event.NodeDisconnectedEvent.class).subscribe(event -> {
+                logger.warn("Lavalink Node [{}] DISCONNECTED.", event.getNode().getName());
             });
 
             JDA jda = JDABuilder.createDefault(token)

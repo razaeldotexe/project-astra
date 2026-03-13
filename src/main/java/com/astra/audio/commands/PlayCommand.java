@@ -66,8 +66,8 @@ public class PlayCommand implements MusicCommand {
         musicManager.getScheduler().setMessageChannel(channel);
         Link link = musicManager.getLink();
         
-        // 1. Connect to voice channel first (JDA native)
-        guild.getJDA().getDirectAudioController().connect(voiceState.getChannel());
+        // 1. Connect to voice channel first (v2 API)
+        link.connect(voiceState.getChannel());
 
         String searchQuery = query.startsWith("http") ? query : "ytsearch:" + query;
 
@@ -77,23 +77,23 @@ public class PlayCommand implements MusicCommand {
             .subscribe(result -> {
                 try {
                     if (result instanceof TrackLoaded t) {
-                        Track track = t.getTrack();
-                        link.updatePlayer(update -> update.setTrack(track)).subscribe();
+                        AudioTrack track = t.getTrack();
+                        link.getPlayer().flatMap(p -> p.play(track)).subscribe();
                         reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "**");
                     } else if (result instanceof PlaylistLoaded p) {
-                        List<Track> tracks = p.getTracks();
+                        List<AudioTrack> tracks = p.getTracks();
                         if (!tracks.isEmpty()) {
-                            Track track = tracks.get(0);
-                            link.updatePlayer(update -> update.setTrack(track)).subscribe();
+                            AudioTrack track = tracks.get(0);
+                            link.getPlayer().flatMap(p -> p.play(track)).subscribe();
                             reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "** (from playlist: " + p.getInfo().getName() + ")");
                         }
                     } else if (result instanceof SearchResult s) {
-                        List<Track> tracks = s.getTracks();
+                        List<AudioTrack> tracks = s.getTracks();
                         if (tracks.isEmpty()) {
                             reply(channel, slashEvent, "❌ No results found.");
                         } else {
-                            Track track = tracks.get(0);
-                            link.updatePlayer(update -> update.setTrack(track)).subscribe();
+                            AudioTrack track = tracks.get(0);
+                            link.getPlayer().flatMap(p -> p.play(track)).subscribe();
                             reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "**");
                         }
                     } else if (result instanceof NoMatches) {
