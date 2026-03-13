@@ -19,6 +19,11 @@ public class InventoryCommand implements EconomyCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "Lihat semua item yang kamu miliki.";
+    }
+
+    @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         User target = event.getOption("user") != null ? event.getOption("user").getAsUser() : event.getUser();
         if (target.isBot()) {

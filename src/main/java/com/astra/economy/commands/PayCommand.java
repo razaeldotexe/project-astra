@@ -18,6 +18,11 @@ public class PayCommand implements EconomyCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "Kirim uang ke user lain.";
+    }
+
+    @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         User target = event.getOption("user").getAsUser();
         long amount = event.getOption("amount").getAsLong();

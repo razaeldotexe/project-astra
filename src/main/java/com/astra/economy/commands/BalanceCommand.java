@@ -21,6 +21,11 @@ public class BalanceCommand implements EconomyCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "Cek saldo uang di dompet dan bank kamu.";
+    }
+
+    @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         User targetUser = event.getOption("user") != null ? event.getOption("user").getAsUser() : event.getUser();
         if (targetUser.isBot()) {

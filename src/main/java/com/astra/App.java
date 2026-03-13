@@ -34,6 +34,7 @@ public class App extends ListenerAdapter {
             JDA jda = JDABuilder.createDefault(token)
                     .setActivity(Activity.playing("Astra Projects | .help - /help"))
                     .enableIntents(GatewayIntent.MESSAGE_CONTENT)
+                    .build();
             CommandHandler commandHandler = new CommandHandler();
             jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler));
 
@@ -73,7 +74,8 @@ public class App extends ListenerAdapter {
                                     .addOption(OptionType.INTEGER, "item_id", "ID item yang ingin dibeli", true),
                             Commands.slash("inventory", "Lihat inventaris item")
                                     .addOption(OptionType.USER, "user", "User yang ingin dilihat inventarisnya", false),
-                            Commands.slash("leaderboard", "Tampilkan top-10 terkaya di server")).queue();
+                            Commands.slash("leaderboard", "Tampilkan top-10 terkaya di server"),
+                            Commands.slash("help", "Tampilkan daftar perintah astra")).queue();
                     logger.info("Production Environment: Commands registered to Guild [{}]", guild.getName());
                 } else {
                     logger.warn("Guild ID [{}] not found. Falling back to global registration.", guildId);
@@ -102,7 +104,8 @@ public class App extends ListenerAdapter {
         jda.updateCommands().addCommands(
                 Commands.slash("ping", "Menghitung latensi bot"),
                 Commands.slash("hello", "Menyapa bot astra"),
-                Commands.slash("balance", "Tampilkan saldo wallet & bank")).queue();
+                Commands.slash("balance", "Tampilkan saldo wallet & bank"),
+                Commands.slash("help", "Tampilkan daftar perintah astra")).queue();
     }
 
     @Override

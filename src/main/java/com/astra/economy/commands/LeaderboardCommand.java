@@ -22,6 +22,11 @@ public class LeaderboardCommand implements EconomyCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "Lihat daftar user terkaya di server.";
+    }
+
+    @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         List<UserEconomy> tops = leaderboardService.getTopUsers(event.getGuild().getId(), 10);
         NumberFormat formatter = NumberFormat.getInstance(new Locale("id", "ID"));

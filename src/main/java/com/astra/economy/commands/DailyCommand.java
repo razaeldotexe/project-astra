@@ -17,6 +17,11 @@ public class DailyCommand implements EconomyCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "Klaim hadiah uang harian kamu.";
+    }
+
+    @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         try {
             long reward = dailyService.claimDaily(event.getUser().getId(), event.getGuild().getId());

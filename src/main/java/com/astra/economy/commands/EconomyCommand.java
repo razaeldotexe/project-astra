@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public interface EconomyCommand {
     String getName();
+    String getDescription();
     void executeSlash(SlashCommandInteractionEvent event);
     void executePrefix(MessageReceivedEvent event, String[] args);
 }

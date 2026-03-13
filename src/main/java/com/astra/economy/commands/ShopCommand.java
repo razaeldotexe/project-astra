@@ -21,6 +21,11 @@ public class ShopCommand implements EconomyCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "Lihat daftar item yang tersedia di toko.";
+    }
+
+    @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         List<Item> items = shopService.getShopItems();
         NumberFormat formatter = NumberFormat.getInstance(new Locale("id", "ID"));

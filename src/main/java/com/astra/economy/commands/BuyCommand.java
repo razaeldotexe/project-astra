@@ -14,6 +14,11 @@ public class BuyCommand implements EconomyCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "Beli item dari toko menggunakan ID.";
+    }
+
+    @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         int itemId = event.getOption("item_id").getAsInt();
 

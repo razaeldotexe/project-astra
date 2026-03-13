@@ -19,6 +19,7 @@ public class CommandHandler {
         registerCommand(new BuyCommand());
         registerCommand(new InventoryCommand());
         registerCommand(new LeaderboardCommand());
+        registerCommand(new HelpCommand(this));
     }
 
     private void registerCommand(EconomyCommand command) {
@@ -34,9 +35,9 @@ public class CommandHandler {
     }
 
     public void handle(SlashCommandInteractionEvent event) {
-        SlashCommand command = commands.get(event.getName());
+        EconomyCommand command = commands.get(event.getName());
         if (command != null) {
-            command.execute(event);
+            command.executeSlash(event);
             return;
         }
 

@@ -17,6 +17,11 @@ public class WorkCommand implements EconomyCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "Bekerja untuk mendapatkan gaji uang.";
+    }
+
+    @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         try {
             WorkService.WorkResult result = workService.work(event.getUser().getId(), event.getGuild().getId());
