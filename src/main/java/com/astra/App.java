@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import io.github.cdimascio.dotenv.Dotenv;
 import com.astra.listeners.SlashCommandListener;
 import com.astra.listeners.PrefixCommandListener;
+import com.astra.listeners.VerifyListener;
 import com.astra.economy.commands.CommandHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class App extends ListenerAdapter {
                     .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                     .build();
             CommandHandler commandHandler = new CommandHandler();
-            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler));
+            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler), new VerifyListener());
 
             jda.awaitReady();
             logger.info("JDA Session Established successfully.");
@@ -56,6 +57,9 @@ public class App extends ListenerAdapter {
                             Commands.slash("monitor-mc2", "Monitor server Minecraft luar berdasarkan IP")
                                     .addOption(OptionType.STRING, "ip", "Alamat IP atau Hostname server Minecraft",
                                             true),
+
+                            Commands.slash("setup", "Setup bot features")
+                                    .addSubcommands(new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("verify", "Setup verification message")),
 
                             // Economy Commands
                             Commands.slash("balance", "Tampilkan saldo wallet & bank")

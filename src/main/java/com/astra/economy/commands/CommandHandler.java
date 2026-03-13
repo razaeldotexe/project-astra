@@ -20,6 +20,7 @@ public class CommandHandler {
         registerCommand(new InventoryCommand());
         registerCommand(new LeaderboardCommand());
         registerCommand(new HelpCommand(this));
+        registerCommand(new SetupCommand());
     }
 
     private void registerCommand(EconomyCommand command) {
