@@ -13,10 +13,10 @@ public class GuildMusicManager {
     public GuildMusicManager(long guildId) {
         this.guildId = guildId;
         this.scheduler = new TrackScheduler(this);
-        this.link = LavalinkManager.getClient().getOrCreateLink(guildId);
+        this.link = com.astra.audio.LavalinkManager.getClient().getOrCreateLink(guildId);
 
         // Register track end event via global client
-        LavalinkManager.getClient().on(TrackEndEvent.class).subscribe(event -> {
+        com.astra.audio.LavalinkManager.getClient().on(TrackEndEvent.class).subscribe(event -> {
             if (event.getGuildId() == guildId && event.getEndReason().getMayStartNext()) {
                 scheduler.nextTrack();
             }

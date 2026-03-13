@@ -1,0 +1,15 @@
+[Unit]
+Description=Astra Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+User=administrator
+WorkingDirectory=c:\Users\Administrator\project\project-astra
+# Wait 20 seconds for Lavalink to fully boot
+ExecStartPre=/bin/sleep 20
+ExecStart=/usr/bin/mvn exec:java
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
