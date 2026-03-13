@@ -51,28 +51,44 @@ public class ShellListener extends ListenerAdapter {
         event.getChannel().sendTyping().queue();
 
         executor.submit(() -> {
-            String output = sshService.executeCommand(command);
-            
-            if (output.length() > 1900) {
-                sendLargeMessage(event, output);
-            } else {
-                event.getChannel().sendMessage("```\n" + output + "\n```").queue();
+            StringBuilder accumulatedOutput = new StringBuilder();
+            final net.dv8tion.jda.api.entities.Message[] messageRef = {null};
+            final long[] lastUpdate = {System.currentTimeMillis()};
+
+            event.getChannel().sendMessage("`> Executing: " + command + "...`").queue(msg -> {
+                messageRef[0] = msg;
+            });
+
+            sshService.executeCommandStreaming(command, chunk -> {
+                accumulatedOutput.append(chunk);
+                long now = System.currentTimeMillis();
+                
+                // Rate limit: Update once every 1200ms to avoid Discord rate limits
+                if (now - lastUpdate[0] > 1200 && messageRef[0] != null) {
+                    updateMessage(messageRef[0], command, accumulatedOutput.toString());
+                    lastUpdate[0] = now;
+                }
+            });
+
+            // Final update after command completion
+            // Wait slightly to ensure messageRef is populated from the async queue
+            int retries = 0;
+            while (messageRef[0] == null && retries < 10) {
+                try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+                retries++;
+            }
+            if (messageRef[0] != null) {
+                updateMessage(messageRef[0], command, accumulatedOutput.toString());
             }
         });
     }
 
-    private void sendLargeMessage(MessageReceivedEvent event, String content) {
-        try {
-            File tempFile = File.createTempFile("output", ".txt");
-            try (FileWriter writer = new FileWriter(tempFile)) {
-                writer.write(content);
-            }
-            event.getChannel().sendFiles(net.dv8tion.jda.api.utils.FileUpload.fromData(tempFile, "output.txt")).queue(
-                success -> tempFile.delete(),
-                error -> tempFile.delete()
-            );
-        } catch (Exception e) {
-            event.getChannel().sendMessage("❌ Error while sending large output: " + e.getMessage()).queue();
+    private void updateMessage(net.dv8tion.jda.api.entities.Message message, String command, String content) {
+        String displayContent = content.trim().isEmpty() ? "[No Output]" : content;
+        // Discord limit is 2000 chars. Let's keep the last 1900 to see current progress.
+        if (displayContent.length() > 1900) {
+            displayContent = "[...TRUNCATED...]\n" + displayContent.substring(displayContent.length() - 1800);
         }
+        message.editMessage("`> " + command + "`\n```\n" + displayContent + "\n```").queue();
     }
 }

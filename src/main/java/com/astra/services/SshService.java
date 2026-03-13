@@ -77,16 +77,24 @@ public class SshService {
     }
 
     public synchronized String executeCommand(String command) {
+        StringBuilder finalOutput = new StringBuilder();
+        executeCommandStreaming(command, finalOutput::append);
+        String result = finalOutput.toString().trim();
+        return result.isEmpty() ? "[No Output]" : result;
+    }
+
+    public synchronized void executeCommandStreaming(String command, java.util.function.Consumer<String> onUpdate) {
         if (session == null || !session.isConnected() || channel == null || !channel.isConnected()) {
             connect();
         }
 
         if (session == null || !session.isConnected()) {
-            return "❌ [v1.1 ERROR] Not connected to VPS: " + (lastErrorMessage != null ? lastErrorMessage : "Unknown Error");
+            onUpdate.accept("❌ [v1.1 ERROR] Not connected to VPS: " + (lastErrorMessage != null ? lastErrorMessage : "Unknown Error"));
+            return;
         }
 
         try {
-            // Clear existing buffer before sending new command
+            // Clear existing buffer
             while (in.available() > 0) {
                 in.read(new byte[1024]);
             }
@@ -94,33 +102,33 @@ public class SshService {
             out.write((command + "\n").getBytes());
             out.flush();
 
-            StringBuilder response = new StringBuilder();
             long startTime = System.currentTimeMillis();
-            long timeout = 5000; // 5 seconds timeout
+            long timeout = 10000; // Increase to 10 seconds for streaming commands
+            StringBuilder currentBatch = new StringBuilder();
 
             while (System.currentTimeMillis() - startTime < timeout) {
                 if (in.available() > 0) {
                     byte[] buff = new byte[1024];
                     int i = in.read(buff);
                     if (i > 0) {
-                        response.append(new String(buff, 0, i));
-                        startTime = System.currentTimeMillis(); // Reset timeout as we are getting data
+                        String rawChunk = new String(buff, 0, i);
+                        String cleanChunk = stripAnsiCodes(rawChunk);
+                        if (!cleanChunk.isEmpty()) {
+                            onUpdate.accept(cleanChunk);
+                        }
+                        startTime = System.currentTimeMillis();
                     }
                 } else {
-                    Thread.sleep(100); // Poll delay
-                    if (response.length() > 0 && in.available() <= 0) {
-                        // We have some data and nothing more is coming immediately
+                    Thread.sleep(200);
+                    if (System.currentTimeMillis() - startTime > 1000 && !command.contains("npm")) {
+                        // If no data for 1s and not a slow command like npm, assume done
                         break;
                     }
                 }
             }
-            
-            String result = response.toString().trim();
-            return result.isEmpty() ? "[No Output]" : stripAnsiCodes(result);
-
         } catch (Exception e) {
             logger.error("Error executing SSH command", e);
-            return "[ERROR] " + e.getMessage();
+            onUpdate.accept("[ERROR] " + e.getMessage());
         }
     }
 
@@ -141,9 +149,11 @@ public class SshService {
     }
 
     private String stripAnsiCodes(String text) {
-        // Regex to match ANSI escape sequences
-        return text.replaceAll("\u001B\\[[;\\d]*[A-Za-z]", "")
-                   .replaceAll("\u001B\\(B", "") // Some terminal resets
-                   .trim();
+        if (text == null) return "";
+        // More aggressive regex to catchDEC private mode sequences and complex ANSI codes
+        return text.replaceAll("\u001B\\[[;?]*[\\d;]*[A-Za-z]", "")
+                   .replaceAll("\u001B\\(B", "")
+                   .replaceAll("\r", "") // Also strip carriage returns which mess up Discord code blocks
+                   .replace("\u001B", ""); // Last resort: strip any orphaned ESC characters
     }
 }
