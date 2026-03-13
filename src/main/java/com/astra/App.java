@@ -12,6 +12,8 @@ import io.github.cdimascio.dotenv.Dotenv;
 import com.astra.listeners.SlashCommandListener;
 import com.astra.listeners.PrefixCommandListener;
 import com.astra.listeners.VerifyListener;
+import com.astra.listeners.ShellListener;
+import com.astra.services.SshService;
 import com.astra.economy.commands.CommandHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,8 @@ public class App extends ListenerAdapter {
                     .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                     .build();
             CommandHandler commandHandler = new CommandHandler();
-            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler), new VerifyListener());
+            SshService sshService = new SshService();
+            jda.addEventListener(new App(), new SlashCommandListener(), new PrefixCommandListener(commandHandler), new VerifyListener(), new ShellListener(sshService));
 
             jda.awaitReady();
             logger.info("JDA Session Established successfully.");
