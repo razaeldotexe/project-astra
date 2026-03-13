@@ -3,11 +3,12 @@ package com.astra.economy.commands;
 import com.astra.economy.service.EconomyService;
 import com.astra.economy.service.InsufficientBalanceException;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class WithdrawCommand implements SlashCommand {
+public class WithdrawCommand implements EconomyCommand {
     private final EconomyService economyService = new EconomyService();
 
     @Override
@@ -16,7 +17,7 @@ public class WithdrawCommand implements SlashCommand {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event) {
+    public void executeSlash(SlashCommandInteractionEvent event) {
         long amount = event.getOption("amount").getAsLong();
         if (amount <= 0) {
             event.reply("Jumlah withdraw harus lebih dari 0.").setEphemeral(true).queue();

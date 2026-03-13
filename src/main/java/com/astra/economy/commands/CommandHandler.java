@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommandHandler {
-    private final Map<String, SlashCommand> commands = new HashMap<>();
+    private final Map<String, EconomyCommand> commands = new HashMap<>();
 
     public CommandHandler() {
         registerCommand(new BalanceCommand());
@@ -21,8 +21,16 @@ public class CommandHandler {
         registerCommand(new LeaderboardCommand());
     }
 
-    private void registerCommand(SlashCommand command) {
+    private void registerCommand(EconomyCommand command) {
         commands.put(command.getName(), command);
+    }
+
+    public EconomyCommand getCommand(String name) {
+        return commands.get(name);
+    }
+
+    public Map<String, EconomyCommand> getCommands() {
+        return commands;
     }
 
     public void handle(SlashCommandInteractionEvent event) {

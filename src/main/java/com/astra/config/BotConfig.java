@@ -20,6 +20,9 @@ public class BotConfig {
     // Default Embed Color
     public static final Color EMBED_COLOR = PRIMARY_COLOR;
     
+    // Bot Configuration
+    public static final String PREFIX = ".";
+    
     // Footer text
     public static final String FOOTER_TEXT = "Astra Economy System";
 }
