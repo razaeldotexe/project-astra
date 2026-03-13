@@ -65,40 +65,46 @@ public class PlayCommand implements MusicCommand {
         GuildMusicManager musicManager = getOrCreate(guild);
         musicManager.getScheduler().setMessageChannel(channel);
         Link link = musicManager.getLink();
+        
+        // 1. Connect to voice channel first
+        guild.getJDA().getDirectAudioController().connect(voiceState.getChannel());
 
         String searchQuery = query.startsWith("http") ? query : "ytsearch:" + query;
 
-        link.loadItem(searchQuery).subscribe(result -> {
-            try {
-                if (result instanceof TrackLoaded) {
-                    Track track = ((TrackLoaded) result).getTrack();
-                    musicManager.getScheduler().queue(track);
-                    reply(channel, slashEvent, "▶️ Memutar: **" + track.getInfo().getTitle() + "**");
-                } else if (result instanceof PlaylistLoaded) {
-                    PlaylistLoaded playlistLoaded = (PlaylistLoaded) result;
-                    List<Track> tracks = playlistLoaded.getTracks();
-                    tracks.forEach(t -> musicManager.getScheduler().queue(t));
-                    reply(channel, slashEvent, "📋 Playlist dimuat: **" + playlistLoaded.getInfo().getName() + "** (" + tracks.size() + " lagu)");
-                } else if (result instanceof SearchResult) {
-                    List<Track> tracks = ((SearchResult) result).getTracks();
-                    if (tracks.isEmpty()) {
-                        reply(channel, slashEvent, "❌ Lagu tidak ditemukan!");
-                    } else {
-                        Track track = tracks.get(0);
+        // 2. Wait for connection (using getPlayer Mono) then load item
+        // This prevents the race condition where tracks are played before voice is ready
+        link.getPlayer()
+            .flatMap(player -> link.loadItem(searchQuery))
+            .subscribe(result -> {
+                try {
+                    if (result instanceof TrackLoaded t) {
+                        Track track = t.getTrack();
                         musicManager.getScheduler().queue(track);
                         reply(channel, slashEvent, "▶️ Memutar: **" + track.getInfo().getTitle() + "**");
+                    } else if (result instanceof PlaylistLoaded p) {
+                        List<Track> tracks = p.getTracks();
+                        tracks.forEach(t -> musicManager.getScheduler().queue(t));
+                        reply(channel, slashEvent, "📋 Playlist dimuat: **" + p.getInfo().getName() + "** (" + tracks.size() + " lagu)");
+                    } else if (result instanceof SearchResult s) {
+                        List<Track> tracks = s.getTracks();
+                        if (tracks.isEmpty()) {
+                            reply(channel, slashEvent, "❌ Lagu tidak ditemukan!");
+                        } else {
+                            Track track = tracks.get(0);
+                            musicManager.getScheduler().queue(track);
+                            reply(channel, slashEvent, "▶️ Memutar: **" + track.getInfo().getTitle() + "**");
+                        }
+                    } else if (result instanceof NoMatches) {
+                        reply(channel, slashEvent, "❌ Tidak ada hasil ditemukan.");
+                    } else if (result instanceof LoadFailed f) {
+                        reply(channel, slashEvent, "❌ Error saat memuat lagu: " + f.getException().getMessage());
                     }
-                } else if (result instanceof NoMatches) {
-                    reply(channel, slashEvent, "❌ Tidak ada hasil ditemukan.");
-                } else if (result instanceof LoadFailed) {
-                    reply(channel, slashEvent, "❌ Error saat memuat lagu: " + ((LoadFailed) result).getException().getMessage());
+                } catch (Exception e) {
+                    reply(channel, slashEvent, "❌ Terjadi kesalahan internal: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                reply(channel, slashEvent, "❌ Terjadi kesalahan internal: " + e.getMessage());
-            }
-        }, throwable -> {
-            reply(channel, slashEvent, "❌ Gagal menghubungi server musik: " + throwable.getMessage());
-        });
+            }, throwable -> {
+                reply(channel, slashEvent, "❌ Gagal menghubungi server musik: " + throwable.getMessage());
+            });
     }
 
     private void reply(MessageChannel channel, SlashCommandInteractionEvent slashEvent, String content) {
