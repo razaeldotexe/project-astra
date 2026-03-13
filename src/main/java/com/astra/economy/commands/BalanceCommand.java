@@ -1,5 +1,6 @@
 package com.astra.economy.commands;
 
+import com.astra.config.BotConfig;
 import com.astra.economy.model.UserEconomy;
 import com.astra.economy.service.EconomyService;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -31,7 +32,7 @@ public class BalanceCommand implements SlashCommand {
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("💰 Saldo Ekonomi: " + targetUser.getName())
-                .setColor(Color.ORANGE)
+                .setColor(BotConfig.EMBED_COLOR)
                 .setThumbnail(targetUser.getEffectiveAvatarUrl())
                 .addField("💵 Wallet", "Rp" + formatter.format(userEconomy.getBalance()), true)
                 .addField("🏦 Bank", "Rp" + formatter.format(userEconomy.getBankBalance()), true)

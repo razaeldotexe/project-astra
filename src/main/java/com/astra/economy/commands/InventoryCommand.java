@@ -1,6 +1,7 @@
 package com.astra.economy.commands;
 
 import com.astra.economy.repository.InventoryRepository;
+import com.astra.config.BotConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -28,7 +29,7 @@ public class InventoryCommand implements SlashCommand {
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("🎒 Inventaris: " + target.getName())
-                .setColor(Color.GREEN)
+                .setColor(BotConfig.EMBED_COLOR)
                 .setThumbnail(target.getEffectiveAvatarUrl());
 
         if (items.isEmpty()) {

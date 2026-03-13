@@ -1,5 +1,6 @@
 package com.astra.economy.commands;
 
+import com.astra.config.BotConfig;
 import com.astra.economy.model.Item;
 import com.astra.economy.service.ShopService;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -25,7 +26,7 @@ public class ShopCommand implements SlashCommand {
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("🛒 Toko Item Astra")
-                .setColor(Color.CYAN)
+                .setColor(BotConfig.EMBED_COLOR)
                 .setDescription("Gunakan `/buy <id>` untuk membeli item.");
 
         for (Item item : items) {

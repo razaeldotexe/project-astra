@@ -64,3 +64,6 @@ Thumbs.db
 # Database
 economy.db
 *.db
+
+# Config
+Astra.txt

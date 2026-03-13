@@ -1,5 +1,6 @@
 package com.astra.economy.commands;
 
+import com.astra.config.BotConfig;
 import com.astra.economy.model.UserEconomy;
 import com.astra.economy.service.LeaderboardService;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -26,7 +27,7 @@ public class LeaderboardCommand implements SlashCommand {
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("🏆 Papan Peringkat Terkaya: " + event.getGuild().getName())
-                .setColor(Color.YELLOW);
+                .setColor(BotConfig.EMBED_COLOR);
 
         if (tops.isEmpty()) {
             embed.setDescription("Belum ada data ekonomi di server ini.");
