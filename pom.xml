@@ -12,6 +12,20 @@
     <exec.mainClass>com.astra.App</exec.mainClass>
   </properties>
 
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/razaeldotexe/project-astra</url>
+    </repository>
+  </distributionManagement>
+
+  <scm>
+    <connection>scm:git:git://github.com/razaeldotexe/project-astra.git</connection>
+    <developerConnection>scm:git:ssh://github.com:razaeldotexe/project-astra.git</developerConnection>
+    <url>https://github.com/razaeldotexe/project-astra/tree/main</url>
+  </scm>
+
   <dependencies>
     <dependency>
       <groupId>net.dv8tion</groupId>

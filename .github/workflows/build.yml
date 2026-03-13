@@ -3,6 +3,8 @@ name: Java CI/CD
 on:
   push:
     branches: [ "main", "master" ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ "main", "master" ]
 
@@ -10,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -22,11 +24,25 @@ jobs:
         java-version: '25'
         distribution: 'oracle'
         cache: maven
+        server-id: github # Needed for mvn deploy to GitHub Packages
 
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+    - name: Build and Deploy to GitHub Packages
+      run: mvn -B deploy -DskipTests --file pom.xml
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload Artifact
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: target/project-astra-1.0-SNAPSHOT-shaded.jar
+        name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Artifact (Manual Download)
       uses: actions/upload-artifact@v4
       with:
         name: Astra-Bot-Build
