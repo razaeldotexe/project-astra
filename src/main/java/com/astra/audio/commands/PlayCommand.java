@@ -6,7 +6,8 @@ import dev.arbjerg.lavalink.client.player.*;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -31,7 +32,7 @@ public class PlayCommand implements MusicCommand {
     public void executeSlash(SlashCommandInteractionEvent event) {
         if (!event.isAcknowledged()) event.deferReply().queue();
         String query = event.getOption("query").getAsString();
-        handlePlay(event.getGuild(), event.getMember(), (TextChannel) event.getChannel(), query, event);
+        handlePlay(event.getGuild(), event.getMember(), event.getChannel(), query, event);
     }
 
     @Override
@@ -41,10 +42,10 @@ public class PlayCommand implements MusicCommand {
             return;
         }
         String query = String.join(" ", args);
-        handlePlay(event.getGuild(), event.getMember(), (TextChannel) event.getChannel(), query, null);
+        handlePlay(event.getGuild(), event.getMember(), event.getChannel(), query, null);
     }
 
-    private void handlePlay(Guild guild, Member member, TextChannel channel, String query, SlashCommandInteractionEvent slashEvent) {
+    private void handlePlay(Guild guild, Member member, MessageChannel channel, String query, SlashCommandInteractionEvent slashEvent) {
         if (member == null) return;
 
         GuildVoiceState voiceState = member.getVoiceState();
@@ -56,7 +57,7 @@ public class PlayCommand implements MusicCommand {
         guild.getJDA().getDirectAudioController().connect(voiceState.getChannel());
 
         GuildMusicManager musicManager = getOrCreate(guild);
-        musicManager.getScheduler().setTextChannel(channel);
+        musicManager.getScheduler().setMessageChannel(channel);
         Link link = musicManager.getLink();
 
         String searchQuery = query.startsWith("http") ? query : "ytsearch:" + query;
@@ -88,7 +89,7 @@ public class PlayCommand implements MusicCommand {
         });
     }
 
-    private void reply(TextChannel channel, SlashCommandInteractionEvent slashEvent, String content) {
+    private void reply(MessageChannel channel, SlashCommandInteractionEvent slashEvent, String content) {
         if (slashEvent != null) {
             slashEvent.getHook().sendMessage(content).queue();
         } else {

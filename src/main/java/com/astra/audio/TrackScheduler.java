@@ -1,7 +1,7 @@
 package com.astra.audio;
 
 import dev.arbjerg.lavalink.client.player.Track;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -10,14 +10,14 @@ public class TrackScheduler {
     private final Queue<Track> queue = new LinkedList<>();
     private Track currentTrack;
     private final GuildMusicManager musicManager;
-    private TextChannel textChannel;
+    private MessageChannel messageChannel;
 
     public TrackScheduler(GuildMusicManager musicManager) {
         this.musicManager = musicManager;
     }
 
-    public void setTextChannel(TextChannel channel) {
-        this.textChannel = channel;
+    public void setMessageChannel(MessageChannel channel) {
+        this.messageChannel = channel;
     }
 
     public void queue(Track track) {
@@ -26,8 +26,8 @@ public class TrackScheduler {
             musicManager.play(track);
         } else {
             queue.add(track);
-            if (textChannel != null)
-                textChannel.sendMessage("📋 Ditambahkan ke queue: **" + track.getInfo().getTitle() + "**").queue();
+            if (messageChannel != null)
+                messageChannel.sendMessage("📋 Ditambahkan ke queue: **" + track.getInfo().getTitle() + "**").queue();
         }
     }
 
@@ -35,11 +35,11 @@ public class TrackScheduler {
         currentTrack = queue.poll();
         if (currentTrack != null) {
             musicManager.play(currentTrack);
-            if (textChannel != null)
-                textChannel.sendMessage("▶️ Sekarang memutar: **" + currentTrack.getInfo().getTitle() + "**").queue();
+            if (messageChannel != null)
+                messageChannel.sendMessage("▶️ Sekarang memutar: **" + currentTrack.getInfo().getTitle() + "**").queue();
         } else {
-            if (textChannel != null)
-                textChannel.sendMessage("✅ Queue selesai!").queue();
+            if (messageChannel != null)
+                messageChannel.sendMessage("✅ Queue selesai!").queue();
             musicManager.stop();
         }
     }
