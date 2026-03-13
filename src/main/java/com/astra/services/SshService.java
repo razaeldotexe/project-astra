@@ -26,9 +26,16 @@ public class SshService {
 
     public synchronized void connect() {
         String host = dotenv.get("VPS_HOST");
+        if (host != null) host = host.trim();
+        
         String portStr = dotenv.get("VPS_PORT", "22");
+        if (portStr != null) portStr = portStr.trim();
+        
         String user = dotenv.get("VPS_USER");
+        if (user != null) user = user.trim();
+        
         String password = dotenv.get("VPS_PASSWORD");
+        if (password != null) password = password.trim();
 
         if (host == null || user == null) {
             logger.warn("VPS credentials not fully configured in .env. SSH Service disabled.");
