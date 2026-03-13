@@ -15,6 +15,8 @@ import com.astra.listeners.VerifyListener;
 import com.astra.listeners.ShellListener;
 import com.astra.services.SshService;
 import com.astra.economy.commands.CommandHandler;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +64,8 @@ public class App extends ListenerAdapter {
                                             true),
 
                             Commands.slash("setup", "Setup bot features")
-                                    .addSubcommands(new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("verify", "Setup verification message")),
+                                    .addSubcommands(new net.dv8tion.jda.api.interactions.commands.build.SubcommandData("verify", "Setup verification message"))
+                                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
 
                             // Economy Commands
                             Commands.slash("balance", "Tampilkan saldo wallet & bank")
@@ -97,6 +100,7 @@ public class App extends ListenerAdapter {
             // Cleanup on shutdown
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 logger.info("Termination signal received. Shutting down...");
+                sshService.disconnect();
                 jda.shutdown();
             }));
 

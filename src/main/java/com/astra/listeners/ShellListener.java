@@ -8,11 +8,14 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ShellListener extends ListenerAdapter {
     private final SshService sshService;
     private final String shellChannelId;
     private final String allowedRoleId;
+    private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
     public ShellListener(SshService sshService) {
         this.sshService = sshService;
@@ -40,7 +43,7 @@ public class ShellListener extends ListenerAdapter {
 
         event.getChannel().sendTyping().queue();
 
-        new Thread(() -> {
+        executor.submit(() -> {
             String output = sshService.executeCommand(command);
             
             if (output.length() > 1900) {
@@ -49,7 +52,7 @@ public class ShellListener extends ListenerAdapter {
             } else {
                 event.getChannel().sendMessage("```\n" + output + "\n```").queue();
             }
-        }).start();
+        });
     }
 
     private void sendLargeMessage(MessageReceivedEvent event, String content) {

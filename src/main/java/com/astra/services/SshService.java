@@ -72,24 +72,37 @@ public class SshService {
         }
 
         try {
+            // Clear existing buffer before sending new command
+            while (in.available() > 0) {
+                in.read(new byte[1024]);
+            }
+
             out.write((command + "\n").getBytes());
             out.flush();
 
-            // Wait a bit for output and read it
-            // Note: This is a simplified approach for a shell channel.
-            // For a more robust implementation, one might use ChannelExec for single commands,
-            // but the requirement asks for persistent session (like cd being maintained).
-            Thread.sleep(500); 
-            
             StringBuilder response = new StringBuilder();
-            while (in.available() > 0) {
-                byte[] buff = new byte[1024];
-                int i = in.read(buff);
-                if (i <= 0) break;
-                response.append(new String(buff, 0, i));
+            long startTime = System.currentTimeMillis();
+            long timeout = 5000; // 5 seconds timeout
+
+            while (System.currentTimeMillis() - startTime < timeout) {
+                if (in.available() > 0) {
+                    byte[] buff = new byte[1024];
+                    int i = in.read(buff);
+                    if (i > 0) {
+                        response.append(new String(buff, 0, i));
+                        startTime = System.currentTimeMillis(); // Reset timeout as we are getting data
+                    }
+                } else {
+                    Thread.sleep(100); // Poll delay
+                    if (response.length() > 0 && in.available() <= 0) {
+                        // We have some data and nothing more is coming immediately
+                        break;
+                    }
+                }
             }
             
-            return response.length() > 0 ? response.toString() : "[No Output]";
+            String result = response.toString().trim();
+            return result.isEmpty() ? "[No Output]" : result;
 
         } catch (Exception e) {
             logger.error("Error executing SSH command", e);

@@ -24,6 +24,11 @@ public class SetupCommand implements EconomyCommand {
     @Override
     public void executeSlash(SlashCommandInteractionEvent event) {
         if (!event.getName().equals("setup")) return;
+        
+        if (!event.getMember().hasPermission(net.dv8tion.jda.api.Permission.ADMINISTRATOR)) {
+            event.reply("❌ Kamu tidak memiliki izin `ADMINISTRATOR` untuk melakukan setup.").setEphemeral(true).queue();
+            return;
+        }
 
         String subcommand = event.getSubcommandName();
         if (subcommand == null) return;
