@@ -25,6 +25,7 @@ public class SshService {
     }
 
     public synchronized void connect() {
+        logger.info("Current Working Directory: {}", System.getProperty("user.dir"));
         String host = dotenv.get("VPS_HOST");
         if (host != null) host = host.trim();
         
@@ -70,7 +71,7 @@ public class SshService {
             readOutputAsync();
 
         } catch (Exception e) {
-            lastErrorMessage = e.getMessage();
+            lastErrorMessage = e.getMessage() + " (Target: " + host + ":" + portStr + ")";
             logger.error("Failed to connect to VPS via SSH: {}", lastErrorMessage);
         }
     }
@@ -115,7 +116,7 @@ public class SshService {
             }
             
             String result = response.toString().trim();
-            return result.isEmpty() ? "[No Output]" : result;
+            return result.isEmpty() ? "[No Output]" : stripAnsiCodes(result);
 
         } catch (Exception e) {
             logger.error("Error executing SSH command", e);
@@ -137,5 +138,12 @@ public class SshService {
         if (channel != null) channel.disconnect();
         if (session != null) session.disconnect();
         logger.info("SSH Session disconnected.");
+    }
+
+    private String stripAnsiCodes(String text) {
+        // Regex to match ANSI escape sequences
+        return text.replaceAll("\u001B\\[[;\\d]*[A-Za-z]", "")
+                   .replaceAll("\u001B\\(B", "") // Some terminal resets
+                   .trim();
     }
 }
