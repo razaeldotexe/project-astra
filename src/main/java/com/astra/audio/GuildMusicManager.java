@@ -1,8 +1,9 @@
 package com.astra.audio;
 
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.player.Track;
-import dev.arbjerg.lavalink.client.event.*;
+import dev.arbjerg.lavalink.client.protocol.Track;
+import dev.arbjerg.lavalink.client.ReadyEvent;
+import dev.arbjerg.lavalink.client.TrackEndEvent;
 import java.util.function.Consumer;
 
 public class GuildMusicManager {

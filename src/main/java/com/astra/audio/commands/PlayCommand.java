@@ -2,8 +2,8 @@ package com.astra.audio.commands;
 
 import com.astra.audio.GuildMusicManager;
 import com.astra.audio.LavalinkManager;
-import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.player.*;
+import dev.arbjerg.lavalink.client.*;
+import dev.arbjerg.lavalink.client.protocol.*;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -60,15 +60,12 @@ public class PlayCommand implements MusicCommand {
             return;
         }
 
-        guild.getJDA().getDirectAudioController().connect(voiceState.getChannel());
+        guild.getAudioManager().openAudioConnection(voiceState.getChannel());
 
         GuildMusicManager musicManager = getOrCreate(guild);
         musicManager.getScheduler().setMessageChannel(channel);
         Link link = musicManager.getLink();
         
-        // 1. Connect to voice channel first (v2 API)
-        link.connect(voiceState.getChannel());
-
         String searchQuery = query.startsWith("http") ? query : "ytsearch:" + query;
 
         // 2. Wait for player ready then load item
@@ -77,23 +74,23 @@ public class PlayCommand implements MusicCommand {
             .subscribe(result -> {
                 try {
                     if (result instanceof TrackLoaded t) {
-                        AudioTrack track = t.getTrack();
-                        link.getPlayer().flatMap(p -> p.play(track)).subscribe();
+                        Track track = t.getTrack();
+                        link.updatePlayer(update -> update.setTrack(track)).subscribe();
                         reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "**");
                     } else if (result instanceof PlaylistLoaded p) {
-                        List<AudioTrack> tracks = p.getTracks();
+                        List<Track> tracks = p.getTracks();
                         if (!tracks.isEmpty()) {
-                            AudioTrack track = tracks.get(0);
-                            link.getPlayer().flatMap(p -> p.play(track)).subscribe();
+                            Track track = tracks.get(0);
+                            link.updatePlayer(update -> update.setTrack(track)).subscribe();
                             reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "** (from playlist: " + p.getInfo().getName() + ")");
                         }
                     } else if (result instanceof SearchResult s) {
-                        List<AudioTrack> tracks = s.getTracks();
+                        List<Track> tracks = s.getTracks();
                         if (tracks.isEmpty()) {
                             reply(channel, slashEvent, "❌ No results found.");
                         } else {
-                            AudioTrack track = tracks.get(0);
-                            link.getPlayer().flatMap(p -> p.play(track)).subscribe();
+                            Track track = tracks.get(0);
+                            link.updatePlayer(update -> update.setTrack(track)).subscribe();
                             reply(channel, slashEvent, "🎵 Now playing: **" + track.getInfo().getTitle() + "**");
                         }
                     } else if (result instanceof NoMatches) {

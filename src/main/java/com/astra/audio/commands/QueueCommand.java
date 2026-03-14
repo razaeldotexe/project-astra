@@ -1,7 +1,7 @@
 package com.astra.audio.commands;
 
 import com.astra.audio.GuildMusicManager;
-import dev.arbjerg.lavalink.client.player.Track;
+import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 

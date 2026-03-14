@@ -1,6 +1,6 @@
 package com.astra.audio;
 
-import dev.arbjerg.lavalink.client.player.Track;
+import dev.arbjerg.lavalink.client.protocol.Track;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 import java.util.LinkedList;

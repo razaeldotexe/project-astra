@@ -12,7 +12,7 @@ public class LavalinkManager {
     private static LavalinkClient client;
 
     public static LavalinkClient createClient(long userId) {
-        client = LavalinkClient.create(userId);
+        client = new LavalinkClient(userId);
         client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
         return client;
     }
